@@ -1,6 +1,6 @@
 normalize-permissions.sh
 
-Fix Permissions For Copied Files Between MacOS, Linux and USB exFAT drives
+[b]Fix Permissions For Copied Files Between MacOS, Linux and USB exFAT drives[/b]
 
 normalize-permissions.sh audits and fixes files after copying a project between macOS, Linux, and USB/exFAT drives.
 
@@ -20,7 +20,11 @@ How to use:
 
  Exit codes:
    0 = clean (or fixed)
+   
    1 = suspicious files found (audit mode)
+   
    2 = usage error
+
+   
 
    Exit code 2 is usually a syntax or path error.
