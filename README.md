@@ -1,30 +1,84 @@
-normalize-permissions.sh
+# normalize-permissions.sh
 
-[b]Fix Permissions For Copied Files Between MacOS, Linux and USB exFAT drives[/b]
+> Audit and fix incorrect executable permissions after copying projects between **macOS**, **Linux**, and **USB (FAT32/exFAT)** drives.
 
-normalize-permissions.sh audits and fixes files after copying a project between macOS, Linux, and USB/exFAT drives.
+## Overview
 
-FAT32/exFAT USB drives have no Unix permission bits, so mounting drivers often invent them — commonly making everything executable. macOS's own permission model is looser about the exec bit than Linux, so files can carry a meaningless-on-Mac exec bit that becomes meaningful (and dangerous to build tools) once they land on Linux. This tool finds and optionally strips those accidental bits, while leaving real executables (scripts with a shebang, ELF binaries, things in bin/ dirs etc) alone.
+`normalize-permissions.sh` helps detect and correct accidental executable permissions that commonly appear when files are copied between different operating systems and removable drives.
 
-You can also use it to remove "apple double" files.
+FAT32 and exFAT filesystems do **not** store Unix permission bits. As a result, mounting drivers often assign synthetic permissions, sometimes marking every file as executable.
 
-How to use:
-   ./normalize-permissions.sh [path]               audit only (default: .)
-   
-   ./normalize-permissions.sh --fix [path]         strip suspicious exec bits
-   
-   ./normalize-permissions.sh --fix --yes [path]   fix without confirmation
-   
-   ./normalize-permissions.sh --clean-appledouble [path]   also remove ._* files
-   
+On macOS, this usually goes unnoticed because the executable bit is less strictly enforced. Once the same project is copied to Linux, however, those unintended permissions can interfere with build systems, packaging tools, version control, and security expectations.
 
- Exit codes:
-   0 = clean (or fixed)
-   
-   1 = suspicious files found (audit mode)
-   
-   2 = usage error
+This script audits your project for suspicious executable permissions and can automatically remove them while preserving legitimate executables.
 
-   
+## Features
 
-   Exit code 2 is usually a syntax or path error.
+* Audit projects for suspicious executable permissions
+* Remove accidental executable bits
+* Preserve legitimate executables, including:
+
+  * Scripts with a shebang (`#!/...`)
+  * ELF binaries
+  * Files inside `bin/` directories
+  * Other recognized executable files
+
+*  Optionally remove AppleDouble (`._*`) files created by macOS
+*  Works well when moving projects between macOS, Linux, and USB drives
+
+## Usage
+
+### Audit only (default)
+
+```bash
+./normalize-permissions.sh [path]
+```
+
+Scans the specified directory (or the current directory if omitted) and reports suspicious executable permissions without making changes.
+
+### Fix suspicious permissions
+
+```bash
+./normalize-permissions.sh --fix [path]
+```
+
+Removes accidental executable bits after confirmation.
+
+### Fix without confirmation
+
+```bash
+./normalize-permissions.sh --fix --yes [path]
+```
+
+Runs non-interactively and applies fixes immediately.
+
+### Remove AppleDouble files
+
+```bash
+./normalize-permissions.sh --clean-appledouble [path]
+```
+
+Also removes macOS AppleDouble (`._*`) metadata files.
+
+## Exit Codes
+
+| Code | Meaning                                                   |
+| ---- | --------------------------------------------------------- |
+| `0`  | No issues found, or all issues were successfully fixed    |
+| `1`  | Suspicious executable permissions were found (audit mode) |
+| `2`  | Usage error (invalid arguments or path)                   |
+
+> **Note:** Exit code `2` usually indicates a command syntax error or an invalid path.
+
+## Why This Exists
+
+Copying projects through FAT32 or exFAT media can silently introduce incorrect executable permissions because those filesystems lack native Unix permission support.
+
+These permissions may appear harmless on macOS but can cause unexpected behavior on Linux, including:
+
+* Files incorrectly treated as executables
+* Build or packaging inconsistencies
+* Repository permission noise
+* Potential security concerns
+
+`normalize-permissions.sh` provides a quick way to restore sensible permissions before committing code, building software, or deploying projects.
