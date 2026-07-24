@@ -10,9 +10,13 @@ You can also use it to remove "apple double" files.
 
 How to use:
    ./normalize-permissions.sh [path]               audit only (default: .)
+   
    ./normalize-permissions.sh --fix [path]         strip suspicious exec bits
+   
    ./normalize-permissions.sh --fix --yes [path]   fix without confirmation
+   
    ./normalize-permissions.sh --clean-appledouble [path]   also remove ._* files
+   
 
  Exit codes:
    0 = clean (or fixed)
